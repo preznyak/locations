@@ -1,5 +1,6 @@
 package microservices.training.locations.service;
 
+import microservices.training.locations.exception.LocationNotFoundException;
 import microservices.training.locations.web.mapper.LocationMapper;
 import microservices.training.locations.model.Location;
 import microservices.training.locations.web.model.CreateLocationCommand;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,7 +43,7 @@ public class LocationsService {
     public LocationDto findLocationById(long id) {
         return locationMapper.toDto(locations.stream()
                 .filter(location -> location.getId() == id).findAny()
-                .orElseThrow(() -> new IllegalArgumentException("Location not found: " + id)));
+                .orElseThrow(notFoundException(id)));
     }
 
     public LocationDto createLocation(CreateLocationCommand command) {
@@ -54,7 +56,7 @@ public class LocationsService {
 
         Location location = locations.stream()
                 .filter(l -> l.getId() == id)
-                .findFirst().orElseThrow(() -> new IllegalArgumentException("Location not found: " + id));
+                .findFirst().orElseThrow(notFoundException(id));
 
         location.setName(command.getName());
         location.setLat(command.getLat());
@@ -66,8 +68,12 @@ public class LocationsService {
     public void deleteLocation(long id) {
         Location location = locations.stream()
                 .filter(l -> l.getId() == id)
-                .findFirst().orElseThrow(() -> new IllegalArgumentException("Location not found: " + id));
+                .findFirst().orElseThrow(notFoundException(id));
 
         locations.remove(location);
+    }
+
+    private static Supplier<LocationNotFoundException> notFoundException(long id) {
+        return () -> new LocationNotFoundException("Location not found: %d".formatted(id));
     }
 }

@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/locations")
@@ -29,20 +28,8 @@ public class LocationsController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<LocationDto> findLocationById(@PathVariable("id") long id) {
-        try {
-            LocationDto locationDto = locationsService.findLocationById(id);
-            return ResponseEntity
-                    .ok()
-                    .header("Response-ID", UUID.randomUUID().toString())
-                    .body(locationDto);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity
-                    .notFound()
-                    .header("Response-ID", UUID.randomUUID().toString())
-                    .build();
-        }
-
+    public LocationDto findLocationById(@PathVariable("id") long id) {
+        return locationsService.findLocationById(id);
     }
 
     @PostMapping
