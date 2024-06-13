@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Service
 public class LocationsService {
 
-    private final AtomicLong idGenerator = new AtomicLong();
+    private AtomicLong idGenerator = new AtomicLong();
 
     private final LocationMapper locationMapper;
 
@@ -75,5 +75,10 @@ public class LocationsService {
 
     private static Supplier<LocationNotFoundException> notFoundException(long id) {
         return () -> new LocationNotFoundException("Location not found: %d".formatted(id));
+    }
+
+    public void deleteAllLocations() {
+        idGenerator = new AtomicLong();
+        locations.clear();
     }
 }
