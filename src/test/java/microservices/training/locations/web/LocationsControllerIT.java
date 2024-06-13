@@ -1,9 +1,12 @@
 package microservices.training.locations.web;
 
-import org.assertj.core.api.Assertions;
+import microservices.training.locations.model.LocationDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -15,9 +18,9 @@ public class LocationsControllerIT {
 
     @Test
     void getLocations() {
-        String locations = locationsController.getLocations();
+        List<LocationDto> locations = locationsController.listLocations(Optional.empty());
 
         assertThat(locations).isNotEmpty();
-        assertThat(locations).startsWith("[Location { name=");
+        assertThat(locations).hasSize(2);
     }
 }

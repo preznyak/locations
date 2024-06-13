@@ -1,19 +1,17 @@
 package microservices.training.locations.web;
 
-import microservices.training.locations.model.Location;
+import microservices.training.locations.model.LocationDto;
 import microservices.training.locations.service.LocationsService;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -26,12 +24,23 @@ class LocationsControllerTest {
     LocationsController locationsController;
 
     @Test
-    void getLocations() {
-        when(locationsService.getLocations()).thenReturn(List.of(new Location(1L, "Debrecen", 47.54, 21.56)));
+    void listLocations() {
+        when(locationsService.listLocations(Optional.empty())).thenReturn(List.of(new LocationDto(1L, "Debrecen", 47.54, 21.56)));
 
-        String response = locationsController.getLocations();
+        List<LocationDto> response = locationsController.listLocations(Optional.empty());
 
-        assertThat(response).startsWith("[Location { name=Debrecen");
+        assertThat(response).isNotEmpty();
+        assertThat(response).hasSize(1);
+    }
+
+    @Test
+    void findLocationById() {
+        when(locationsService.findLocationById(1L)).thenReturn(new LocationDto(1L, "Nyíregyháza", 48.03, 20.41));
+
+        LocationDto response = locationsController.findLocationById(1L);
+
+        assertThat(response).isNotNull();
+        assertThat(response).hasNoNullFieldsOrProperties();
     }
 
 }

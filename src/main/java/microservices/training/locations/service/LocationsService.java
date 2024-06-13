@@ -1,26 +1,44 @@
 package microservices.training.locations.service;
 
 import microservices.training.locations.model.Location;
+import microservices.training.locations.model.LocationDto;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class LocationsService {
 
-    private List<Location> locations = new ArrayList<>();
+    private final ModelMapper modelMapper;
 
-    public List<Location> getLocations() {
-        if (locations.isEmpty()) {
-            fillLocationsList();
-        }
-        return locations;
+    public LocationsService(ModelMapper modelMapper) {
+        this.modelMapper = modelMapper;
     }
 
-    private void fillLocationsList() {
-        locations.add(new Location(1L, "Debrecen", 47.54, 21.56));
-        locations.add(new Location(2L, "Siófok", 46.90, 18.07));
-        locations.add(new Location(3L, "Répáshuta", 48.04, 20.51));
+    private final List<Location> locations = Collections.synchronizedList(new ArrayList<>(List.of(
+            new Location(1L, "Debrecen", 47.54, 21.56),
+            new Location(2L, "Siófok", 46.90, 18.07)
+    )));
+
+    public List<LocationDto> listLocations(Optional<String> prefix) {
+        Type targetListType = new TypeToken<List<LocationDto>>(){}.getType();
+        List<Location> filtered = locations.stream()
+                .filter(location -> prefix.isEmpty() || location.getName().toLowerCase().startsWith(prefix.get().toLowerCase()))
+                .collect(Collectors.toList());
+        return modelMapper.map(filtered, targetListType);
+    }
+
+    public LocationDto findLocationById(long id) {
+        return modelMapper.map(locations.stream()
+                .filter(location -> location.getId() == id).findAny()
+                .orElseThrow(() -> new IllegalArgumentException("Location not found: " + id)),
+                LocationDto.class);
     }
 }
