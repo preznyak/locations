@@ -1,11 +1,11 @@
 package microservices.training.locations.web;
 
-import microservices.training.locations.model.LocationDto;
+import microservices.training.locations.web.model.LocationDto;
 import microservices.training.locations.service.LocationsService;
+import microservices.training.locations.web.model.QueryParameters;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/locations")
@@ -18,8 +18,8 @@ public class LocationsController {
     }
 
     @GetMapping
-    public List<LocationDto> listLocations(@RequestParam Optional<String> prefix) {
-        return locationsService.listLocations(prefix);
+    public List<LocationDto> listLocations(QueryParameters queryParameters) {
+        return locationsService.listLocations(queryParameters);
     }
 
     @GetMapping("/{id}")

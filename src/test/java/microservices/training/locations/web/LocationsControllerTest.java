@@ -1,7 +1,8 @@
 package microservices.training.locations.web;
 
-import microservices.training.locations.model.LocationDto;
+import microservices.training.locations.web.model.LocationDto;
 import microservices.training.locations.service.LocationsService;
+import microservices.training.locations.web.model.QueryParameters;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -9,7 +10,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -25,9 +25,9 @@ class LocationsControllerTest {
 
     @Test
     void listLocations() {
-        when(locationsService.listLocations(Optional.empty())).thenReturn(List.of(new LocationDto(1L, "Debrecen", 47.54, 21.56)));
+        when(locationsService.listLocations(new QueryParameters())).thenReturn(List.of(new LocationDto(1L, "Debrecen", 47.54, 21.56)));
 
-        List<LocationDto> response = locationsController.listLocations(Optional.empty());
+        List<LocationDto> response = locationsController.listLocations(new QueryParameters());
 
         assertThat(response).isNotEmpty();
         assertThat(response).hasSize(1);

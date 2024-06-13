@@ -1,7 +1,8 @@
 package microservices.training.locations.service;
 
 import microservices.training.locations.model.Location;
-import microservices.training.locations.model.LocationDto;
+import microservices.training.locations.web.model.LocationDto;
+import microservices.training.locations.web.model.QueryParameters;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.stereotype.Service;
@@ -10,7 +11,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
@@ -30,10 +30,11 @@ public class LocationsService {
             new Location(counter.incrementAndGet(), "Siófok", 46.90, 18.07)
     )));
 
-    public List<LocationDto> listLocations(Optional<String> prefix) {
+    public List<LocationDto> listLocations(QueryParameters queryParameters) {
         Type targetListType = new TypeToken<List<LocationDto>>(){}.getType();
         List<Location> filtered = locations.stream()
-                .filter(location -> prefix.isEmpty() || location.getName().toLowerCase().startsWith(prefix.get().toLowerCase()))
+                .filter(location -> queryParameters.getPrefix() == null || location.getName().toLowerCase().startsWith(queryParameters.getPrefix().toLowerCase()))
+                .filter(location -> queryParameters.getSuffix() == null || location.getName().toLowerCase().endsWith(queryParameters.getSuffix().toLowerCase()))
                 .collect(Collectors.toList());
         return modelMapper.map(filtered, targetListType);
     }

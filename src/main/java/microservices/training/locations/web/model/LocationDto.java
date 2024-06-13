@@ -1,4 +1,4 @@
-package microservices.training.locations.model;
+package microservices.training.locations.web.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
