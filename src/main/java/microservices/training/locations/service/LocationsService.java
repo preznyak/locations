@@ -11,10 +11,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 @Service
 public class LocationsService {
+
+    private final AtomicLong counter = new AtomicLong(0);
 
     private final ModelMapper modelMapper;
 
@@ -23,8 +26,8 @@ public class LocationsService {
     }
 
     private final List<Location> locations = Collections.synchronizedList(new ArrayList<>(List.of(
-            new Location(1L, "Debrecen", 47.54, 21.56),
-            new Location(2L, "Siófok", 46.90, 18.07)
+            new Location(counter.incrementAndGet(), "Debrecen", 47.54, 21.56),
+            new Location(counter.incrementAndGet(), "Siófok", 46.90, 18.07)
     )));
 
     public List<LocationDto> listLocations(Optional<String> prefix) {
