@@ -1,15 +1,13 @@
 package microservices.training.locations.service;
 
+import microservices.training.locations.web.mapper.LocationMapper;
 import microservices.training.locations.model.Location;
 import microservices.training.locations.web.model.CreateLocationCommand;
 import microservices.training.locations.web.model.LocationDto;
 import microservices.training.locations.web.model.QueryParameters;
 import microservices.training.locations.web.model.UpdateLocationCommand;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -21,10 +19,10 @@ public class LocationsService {
 
     private final AtomicLong idGenerator = new AtomicLong();
 
-    private final ModelMapper modelMapper;
+    private final LocationMapper locationMapper;
 
-    public LocationsService(ModelMapper modelMapper) {
-        this.modelMapper = modelMapper;
+    public LocationsService(LocationMapper locationMapper) {
+        this.locationMapper = locationMapper;
     }
 
     private final List<Location> locations = Collections.synchronizedList(new ArrayList<>(List.of(
@@ -33,25 +31,23 @@ public class LocationsService {
     )));
 
     public List<LocationDto> listLocations(QueryParameters queryParameters) {
-        Type targetListType = new TypeToken<List<LocationDto>>(){}.getType();
         List<Location> filtered = locations.stream()
                 .filter(location -> queryParameters.getPrefix() == null || location.getName().toLowerCase().startsWith(queryParameters.getPrefix().toLowerCase()))
                 .filter(location -> queryParameters.getSuffix() == null || location.getName().toLowerCase().endsWith(queryParameters.getSuffix().toLowerCase()))
                 .collect(Collectors.toList());
-        return modelMapper.map(filtered, targetListType);
+        return locationMapper.toDto(filtered);
     }
 
     public LocationDto findLocationById(long id) {
-        return modelMapper.map(locations.stream()
+        return locationMapper.toDto(locations.stream()
                 .filter(location -> location.getId() == id).findAny()
-                .orElseThrow(() -> new IllegalArgumentException("Location not found: " + id)),
-                LocationDto.class);
+                .orElseThrow(() -> new IllegalArgumentException("Location not found: " + id)));
     }
 
     public LocationDto createLocation(CreateLocationCommand command) {
         Location location = new Location(idGenerator.incrementAndGet(), command.getName(), command.getLat(), command.getLon());
         locations.add(location);
-        return modelMapper.map(location, LocationDto.class);
+        return locationMapper.toDto(location);
     }
 
     public LocationDto updateLocation(long id, UpdateLocationCommand command) {
@@ -64,7 +60,7 @@ public class LocationsService {
         location.setLat(command.getLat());
         location.setLon(command.getLon());
 
-        return modelMapper.map(location, LocationDto.class);
+        return locationMapper.toDto(location);
     }
 
     public void deleteLocation(long id) {
