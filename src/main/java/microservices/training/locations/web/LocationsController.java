@@ -1,8 +1,10 @@
 package microservices.training.locations.web;
 
+import microservices.training.locations.web.model.CreateLocationCommand;
 import microservices.training.locations.web.model.LocationDto;
 import microservices.training.locations.service.LocationsService;
 import microservices.training.locations.web.model.QueryParameters;
+import microservices.training.locations.web.model.UpdateLocationCommand;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +27,24 @@ public class LocationsController {
     @GetMapping("/{id}")
     public LocationDto findLocationById(@PathVariable("id") long id) {
         return locationsService.findLocationById(id);
+    }
+
+    @PostMapping
+    public LocationDto createLocation(@RequestBody CreateLocationCommand command) {
+        return locationsService.createLocation(command);
+    }
+
+    @PutMapping("/{id}")
+    public LocationDto updateLocation(
+            @PathVariable("id") long id,
+            @RequestBody UpdateLocationCommand command
+            ) {
+        return locationsService.updateLocation(id, command);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteLocation(@PathVariable("id") long id) {
+        locationsService.deleteLocation(id);
     }
 
 }

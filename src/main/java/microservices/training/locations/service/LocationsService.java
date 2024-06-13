@@ -1,8 +1,10 @@
 package microservices.training.locations.service;
 
 import microservices.training.locations.model.Location;
+import microservices.training.locations.web.model.CreateLocationCommand;
 import microservices.training.locations.web.model.LocationDto;
 import microservices.training.locations.web.model.QueryParameters;
+import microservices.training.locations.web.model.UpdateLocationCommand;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.stereotype.Service;
@@ -17,7 +19,7 @@ import java.util.stream.Collectors;
 @Service
 public class LocationsService {
 
-    private final AtomicLong counter = new AtomicLong(0);
+    private final AtomicLong idGenerator = new AtomicLong();
 
     private final ModelMapper modelMapper;
 
@@ -26,8 +28,8 @@ public class LocationsService {
     }
 
     private final List<Location> locations = Collections.synchronizedList(new ArrayList<>(List.of(
-            new Location(counter.incrementAndGet(), "Debrecen", 47.54, 21.56),
-            new Location(counter.incrementAndGet(), "Siófok", 46.90, 18.07)
+            new Location(idGenerator.incrementAndGet(), "Debrecen", 47.54, 21.56),
+            new Location(idGenerator.incrementAndGet(), "Siófok", 46.90, 18.07)
     )));
 
     public List<LocationDto> listLocations(QueryParameters queryParameters) {
@@ -44,5 +46,32 @@ public class LocationsService {
                 .filter(location -> location.getId() == id).findAny()
                 .orElseThrow(() -> new IllegalArgumentException("Location not found: " + id)),
                 LocationDto.class);
+    }
+
+    public LocationDto createLocation(CreateLocationCommand command) {
+        Location location = new Location(idGenerator.incrementAndGet(), command.getName(), command.getLat(), command.getLon());
+        locations.add(location);
+        return modelMapper.map(location, LocationDto.class);
+    }
+
+    public LocationDto updateLocation(long id, UpdateLocationCommand command) {
+
+        Location location = locations.stream()
+                .filter(l -> l.getId() == id)
+                .findFirst().orElseThrow(() -> new IllegalArgumentException("Location not found: " + id));
+
+        location.setName(command.getName());
+        location.setLat(command.getLat());
+        location.setLon(command.getLon());
+
+        return modelMapper.map(location, LocationDto.class);
+    }
+
+    public void deleteLocation(long id) {
+        Location location = locations.stream()
+                .filter(l -> l.getId() == id)
+                .findFirst().orElseThrow(() -> new IllegalArgumentException("Location not found: " + id));
+
+        locations.remove(location);
     }
 }
