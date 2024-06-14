@@ -5,7 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.Range;
+import microservices.training.locations.annotation.Coordinate;
+import microservices.training.locations.model.Type;
 
 @Data
 @AllArgsConstructor
@@ -17,10 +18,10 @@ public class CreateLocationCommand {
     private String name;
 
     @Schema(description = "latitude of the location", example = "42.66")
-    @Range(min = -90L, max = 90L)
+    @Coordinate(type = Type.LAT)
     private double lat;
 
     @Schema(description = "longitude of the location", example = "18.26")
-    @Range(min = -180L, max = 180L)
+    @Coordinate(type = Type.LON)
     private double lon;
 }

@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.iterableWithSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -68,5 +69,22 @@ public class LocationsControllerWebMvcIT {
         mockMvc.perform(post("/api/locations").content(requestBody).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("name", equalTo("Kiskereki")));
+    }
+
+    @Test
+    void testCreateLocationWithInvalidCoordinate() throws Exception {
+
+        CreateLocationCommand invalidCommand = new CreateLocationCommand("Kiskereki", 100.56, 20.12);
+        LocationDto locationDto = new LocationDto(1L, "Kiskereki", 100.56, 20.12);
+        when(locationsService.createLocation(invalidCommand))
+                .thenReturn(locationDto);
+        String invalidRequestBody = objectMapper.writeValueAsString(invalidCommand);
+
+        mockMvc.perform(post("/api/locations").content(invalidRequestBody).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("violations", iterableWithSize(1)))
+                .andExpect(jsonPath("violations[0].field", equalTo("lat")))
+                .andExpect(jsonPath("violations[0].message", equalTo("Invalid coordinate")));
+
     }
 }
