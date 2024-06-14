@@ -3,12 +3,13 @@ package microservices.training.locations.web;
 import microservices.training.locations.service.LocationsService;
 import microservices.training.locations.web.model.CreateLocationCommand;
 import microservices.training.locations.web.model.LocationDto;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.RepeatedTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
+import org.springframework.test.context.jdbc.Sql;
 
 import java.util.List;
 
@@ -16,6 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Sql(statements = "delete from locations")
 public class LocationsControllerRestTemplateIT {
 
     @Autowired
@@ -24,15 +26,13 @@ public class LocationsControllerRestTemplateIT {
     @Autowired
     LocationsService locationsService;
 
-    @Test
+    @RepeatedTest(2)
     void testListLocations() {
-
-        locationsService.deleteAllLocations();
 
         LocationDto locationDto = testRestTemplate.postForObject("/api/locations",
                 new CreateLocationCommand("Kiskereki", 42.56, 20.12), LocationDto.class);
 
-        assertEquals("Kiskereki", locationDto.getName());
+        assertEquals("KISKEREKI", locationDto.getName());
 
         testRestTemplate.postForObject("/api/locations",
                 new CreateLocationCommand("Csokaly", 45.12, 20.41), LocationDto.class);
@@ -45,6 +45,6 @@ public class LocationsControllerRestTemplateIT {
 
         assertThat(locations)
                 .extracting(LocationDto::getName)
-                .containsExactly("Kiskereki", "Csokaly");
+                .containsExactly("KISKEREKI", "CSOKALY");
     }
 }

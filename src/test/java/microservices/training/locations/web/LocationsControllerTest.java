@@ -1,7 +1,7 @@
 package microservices.training.locations.web;
 
-import microservices.training.locations.web.model.LocationDto;
 import microservices.training.locations.service.LocationsService;
+import microservices.training.locations.web.model.LocationDto;
 import microservices.training.locations.web.model.QueryParameters;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

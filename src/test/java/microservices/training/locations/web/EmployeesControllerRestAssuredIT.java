@@ -12,7 +12,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static io.restassured.module.mockmvc.RestAssuredMockMvc.*;
+import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
+import static io.restassured.module.mockmvc.RestAssuredMockMvc.with;
 import static org.hamcrest.CoreMatchers.equalTo;
 
 @SpringBootTest
@@ -42,14 +43,14 @@ public class EmployeesControllerRestAssuredIT {
                 .post("/api/locations")
                 .then()
                 .statusCode(201)
-                .body("name", equalTo("Chicago"))
+                .body("name", equalTo("CHICAGO"))
                 .log();
 
         with()
                 .get("/api/locations")
                 .then()
                 .statusCode(200)
-                .body("[0].name", equalTo("Chicago"))
+                .body("[0].name", equalTo("CHICAGO"))
                 .body("size()", equalTo(1));
     }
 
