@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import microservices.training.locations.web.model.*;
 import microservices.training.locations.service.LocationsService;
 import org.springframework.http.HttpStatus;
@@ -49,7 +50,7 @@ public class LocationsController {
     @Operation(summary = "creates a location")
     @ApiResponse(responseCode = "201", description = "location has been created")
     public ResponseEntity<LocationDto> createLocation(
-            @RequestBody CreateLocationCommand command,
+            @Valid @RequestBody CreateLocationCommand command,
             UriComponentsBuilder uri
     ) {
         LocationDto locationDto = locationsService.createLocation(command);
