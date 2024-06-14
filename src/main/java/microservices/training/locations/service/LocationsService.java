@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import microservices.training.locations.config.LocationsProperties;
 import microservices.training.locations.exception.LocationNotFoundException;
+import microservices.training.locations.repo.LocationsRepository;
 import microservices.training.locations.web.mapper.LocationMapper;
 import microservices.training.locations.model.Location;
 import microservices.training.locations.web.model.CreateLocationCommand;
@@ -13,8 +14,6 @@ import microservices.training.locations.web.model.UpdateLocationCommand;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
@@ -30,14 +29,10 @@ public class LocationsService {
 
     private final LocationMapper locationMapper;
     private final LocationsProperties locationsProperties;
-
-    private final List<Location> locations = Collections.synchronizedList(new ArrayList<>(List.of(
-            new Location(idGenerator.incrementAndGet(), "Debrecen", 47.54, 21.56),
-            new Location(idGenerator.incrementAndGet(), "Siófok", 46.90, 18.07)
-    )));
+    private final LocationsRepository locationsRepository;
 
     public List<LocationDto> listLocations(QueryParameters queryParameters) {
-        List<Location> filtered = locations.stream()
+        List<Location> filtered = locationsRepository.findAll().stream()
                 .filter(location -> queryParameters.getPrefix() == null || location.getName().toLowerCase().startsWith(queryParameters.getPrefix().toLowerCase()))
                 .filter(location -> queryParameters.getSuffix() == null || location.getName().toLowerCase().endsWith(queryParameters.getSuffix().toLowerCase()))
                 .collect(Collectors.toList());
@@ -46,8 +41,7 @@ public class LocationsService {
     }
 
     public LocationDto findLocationById(long id) {
-        LocationDto locationDto = locationMapper.toDto(locations.stream()
-                .filter(location -> location.getId() == id).findAny()
+        LocationDto locationDto = locationMapper.toDto(locationsRepository.findById(id)
                 .orElseThrow(notFoundException(id)));
         log.debug("Location has been found with id {}", id);
         return locationDto;
@@ -56,7 +50,7 @@ public class LocationsService {
     public LocationDto createLocation(CreateLocationCommand command) {
         String locationName = locationsProperties.getToUppercase() ? command.getName().toUpperCase() : command.getName();
         Location location = new Location(idGenerator.incrementAndGet(), locationName, command.getLat(), command.getLon());
-        locations.add(location);
+        locationsRepository.save(location);
         log.info("Location has been created.");
         log.debug("Location has been created with name {} and id {}", locationName, location.getId());
         return locationMapper.toDto(location);
@@ -64,25 +58,21 @@ public class LocationsService {
 
     public LocationDto updateLocation(long id, UpdateLocationCommand command) {
 
-        Location location = locations.stream()
-                .filter(l -> l.getId() == id)
-                .findFirst().orElseThrow(notFoundException(id));
-
-        location.setName(command.getName());
+        Location location = locationsRepository.findById(id)
+                .orElseThrow(notFoundException(id));
+        String locationName = locationsProperties.getToUppercase() ? command.getName().toUpperCase() : command.getName();
+        location.setName(locationName);
         location.setLat(command.getLat());
         location.setLon(command.getLon());
 
+        locationsRepository.save(location);
         log.debug("Location has been updated with id {}", location.getId());
 
         return locationMapper.toDto(location);
     }
 
     public void deleteLocation(long id) {
-        Location location = locations.stream()
-                .filter(l -> l.getId() == id)
-                .findFirst().orElseThrow(notFoundException(id));
-
-        locations.remove(location);
+        locationsRepository.deleteById(id);
         log.debug("Location has been removed with id {}", id);
     }
 
@@ -91,7 +81,6 @@ public class LocationsService {
     }
 
     public void deleteAllLocations() {
-        idGenerator = new AtomicLong();
-        locations.clear();
+        locationsRepository.deleteAll();
     }
 }
