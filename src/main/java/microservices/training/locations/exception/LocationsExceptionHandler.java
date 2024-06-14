@@ -1,7 +1,5 @@
 package microservices.training.locations.exception;
 
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -13,7 +11,6 @@ import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
-@Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
 public class LocationsExceptionHandler {
 
